@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block content%}
+
+    <div class="row">
+      <p class="col-md-12 text-center">会員名称で会員を検索します。検索条件無しの場合は全て表示されます。</p>
+
+    </div>
+<!-- Begin vung dieu kien tim kiem -->
+<br>
+<form action="{{url_for('views.employee')}}" method="post">
+  <div class="row mb-3">
+    <div class="col-sm-2 text-left"></div>
+    <div class="col-sm-1 ml-5 text-left">氏名:</div>
+    <div class="col-md-8"><input type="text" class="col-md-2" name="search" value=""></div>
+  </div>
+  <div class="row">
+    <div class="col-sm-2 text-left"></div>
+    <div class="col-sm-1 ml-5 text-left">グループ:</div>
+    <div class="col-md-8">
+      <select id="sel1" name="group">
+        <option>全て</option>
+        <option>BAP Đà Nẵng</option>
+        <option>BAP Huế</option>
+        <option>BAP Tp HCM</option>
+        <option>BAP TOKYO</option>
+        <option>BAP OSAKA</option>
+      </select>
+      <input class="btn btn-primary" type="submit" value="検索" />
+      <a href="{{url_for('views.update', id=0)}}" >新規追加</a>
+    </div>
+  </div>
+<div class="container mt-3" style="width:100%;">
+  <table class="table">
+    <thead class="thead-light">
+        <tr>
+          <th>ID</th>
+          <th>氏名</th>
+          <th>生年月日</th>
+          <th>グループ</th>
+          <th>メールアドレス</th>
+          <th>電話番号</th>
+          <th>ロール</th>
+          <th>失効船内での日付日</th>
+        </tr>
+      </thead>
+    <tbody>
+      {% for i in rows %}
+        <tr>
+          <td> <a href="{{url_for('views.view_detail', id=i.id)}}">{{i.id}}</a></td>
+          <td>{{i.full_name}}</td>
+          <td>{{i.birthday}}</td>
+          <td>{{i.group_name}}</td>
+          <td>{{i.email}}</td>
+          <td>{{i.tel}}</td>
+          <td>{{i.role_name}}</td>
+          <td>{{i.onboard_date}}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+</form>
+
+{% endblock %}

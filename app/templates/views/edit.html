@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block content%}
+	<h3 class='text-center'>会員情報編集 </h3>
+
+
+	<form action="" method="post" name="inputform">
+		<div class="container">
+			<table class="table">
+				<tbody>
+					<tr>
+						<td><span style="color:red">*</span> アカウント名:</td>
+						{% if page_id == 0 %}
+							<td> <input type="text" name="email" value=""> </td>
+						{% else %}
+							<td>{{user.email}}</td>
+						{% endif %}
+					</tr>
+					<tr>
+						<td><span style="color:red">*</span> グループ:</td>
+						<td>
+							<select id="sel1" name="group" value='BAP Đà Nẵng'>
+				        <option>選択してください</option>
+								{% for group in groups %}
+									{% if group == user.group_name %}
+										<option selected>{{group}}</option>
+									{% else %}
+										<option>{{group}}</option>
+									{% endif %}
+								{% endfor %}
+			      	</select>
+					 	</td>
+					</tr>
+					<tr>
+						<td><span style="color:red">*</span>ロール:</td>
+						<td>
+							<select id="sel1" name="role">
+				        <option>選択してください</option>
+								{% for role in roles %}
+									{% if role == user.role_name %}
+										<option selected>{{role}}</option>
+									{% else %}
+										<option>{{role}}</option>
+									{% endif %}
+								{% endfor %}
+			      	</select>
+						</td>
+					</tr>
+					<tr>
+						<td><span style="color:red">*</span> 氏名:</td>
+						<td> <input type="text" name="full_name" value="{{user.full_name}}"></td>
+					</tr>
+					<tr>
+						<td>カタカナ氏名:</td>
+						<td> <input type="text" name="fullname_kana" value="{{user.fullname_kana}}"></td>
+					</tr>
+					<tr>
+						<td><span style="color:red">*</span> 生年月日:</td>
+						<td>
+							<input type="date" name="birthday" value="{{user.birthday}}">
+						</td>
+					</tr>
+					<tr>
+						<td>メールアドレス:</td>
+						<td> <input type="text" name="persional_email" value="{{user.persional_email}}"></td>
+					</tr>
+					<tr>
+						<td><span style="color:red">*</span> 電話番号:</td>
+						<td> <input type="text" name="tel" value="{{user.tel}}"></td>
+					</tr>
+					<tr>
+						<td><span style="color:red">*</span> パスワード:</td>
+						<td> <input type="text" name="password" value=""> </td>
+					</tr>
+					<tr>
+						<td>パスワード（確認）:</td>
+						<td> <input type="text" name="pass_confirm" value=""> </td>
+					</tr>
+				</tbody>
+			</table>
+
+			<p class='text-center'>
+        <a data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+          端末
+        </a>
+      </p>
+			<div class="collapse" id="collapseExample">
+				<div class="row">
+					<span class="col-sm-3 text-right">装置名:</span>
+					<select class='ml-0' name="device">
+						<option>選択してください</option>
+						<option>CPU</option>
+						<option>Monitor</option>
+					</select>
+					<span class='ml-3'> 開始日:</span>
+					<input class='ml-2' type="date" name="start_date" value="">
+					<span class='ml-3'> 終了日:</span>
+					<input class='ml-2' type="date" name="end_date" value="">
+				</div>
+			</div>
+			<button class='btn btn-primary' type="button" id="btn">add</button>
+			<br>
+			<br>
+			<div class="row">
+				<span class="col-sm-6"></span>
+				<input class='col-sm-1 btn-primary btn-sm mr-4'  type="submit" value="確認">
+				{% if page_id == 0 %}
+					<a class="btn-secondary btn-sm mr-4"href="{{url_for('views.employee')}}">戻る</a>
+				{% else %}
+					<a class="btn-secondary btn-sm mr-4"href="{{url_for('views.view_detail', id=page_id)}}">戻る</a>
+				{% endif %}
+			</div>
+		</div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script src="../static/js/addrow.js">
+</script>
+{% endblock %}
