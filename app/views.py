@@ -1,14 +1,17 @@
 import functools
 import json
+from math import ceil
 
 from flask import (
-    Blueprint, flash, g, redirect, render_template, request, session, url_for,
+    Blueprint, flash, g, redirect, render_template,
+    request, session, url_for,
     send_from_directory
 )
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from .models import db, User, Mst_devices, Mst_group, Role, User_device_history, UserScure
-
+from .models import (db, User, Mst_devices, Mst_group, Role,
+                     User_device_history, UserScure
+)
 from .auth import login_required
 
 
@@ -20,34 +23,55 @@ bp = Blueprint('views', __name__)
 @bp.route("/", methods=["GET", "POST"])
 # @login_required
 def employee():
-
+    page = request.args.get('page', 1, type=int)
+    pagination = 5
+    group_list = ['BAP Đà Nẵng', 'BAP Huế', 'BAP Tp HCM',
+        'BAP TOKYO', 'BAP OSAKA']
     list_columns = ['id','full_name', 'birthday', 'group_name', 'email',
         'onboard_date', 'role_name']
     if request.method == "POST":
         name = request.form['search']
         group = request.form['group']
+        g.name = request.form['ordername']
+        g.role = request.form['orderrole']
+        g.date = request.form['orderdate']
+        x = User.full_name
+        y = Role.role_name
+        z = User.onboard_date
+        if g.name == '⌃':
+            x = User.full_name.desc()
+        if g.role == '⌃':
+            y = Role.role_name.desc()
+        if g.date == '⌃':
+            z = User.onboard_date.desc()
         if group == '全て':
             group = ''
         query = db.session.query(User.id,
             User.email, User.full_name, User.tel, User.birthday,
             User.onboard_date, Mst_group.group_name,
             Role.role_name
-            ).join(Role).join(Mst_group)\
-        .filter(User.full_name.like(f'%{name}%')).filter(Mst_group.group_name.like(f'%{group}%'))\
-        .order_by(User.onboard_date.desc(),Role.role_name,
-            Mst_group.group_name, User.full_name).all()
-
-        return render_template('views/list_employees.html', users=list_columns, rows=query)
-
+            ).join(Role).join(Mst_group
+            ).filter(User.full_name.like(f'%{name}%')
+            ).filter(Mst_group.group_name.like(f'%{group}%')
+            ).order_by(x, y, z).paginate(page, pagination, False)
+        return render_template('views/list_employees.html',
+            users=list_columns, rows=query, group=(ceil(page/3)-1),
+            name=name, se_group=group, group_list=group_list)
+    g.name = "⌄"
+    g.role = "⌄"
+    g.date = "⌃"
     query = db.session.query(User.id,
         User.email, User.full_name, User.gender, User.birthday,
         User.onboard_date, Mst_group.group_name, User.tel,
         Role.role_name
-        ).join(Role).join(Mst_group)\
-    .order_by(User.onboard_date.desc(),Role.role_name,
-        Mst_group.group_name, User.full_name).all()
+        ).join(Role).join(Mst_group
+        ).order_by(User.full_name, Role.role_name,
+        User.onboard_date.desc()).paginate(page, pagination, False)
+
     return render_template('views/list_employees.html', users=list_columns,
-        rows=query)
+        rows=query, group=(ceil(page/3)-1),
+        group_list=group_list)
+
 
 @bp.route('/update/<int:id>', methods = ['GET', 'POST'])
 # @login_required
@@ -116,7 +140,7 @@ def view_detail(id):
         devices=query_devices, page_id = id)
 
 
-@bp.route('/confirm', methods = ['POST'])
+@bp.route('/confirm', methods = ['GET', 'POST'])
 def confirm():
     x = session['scure_new']
     y = session['user_new']

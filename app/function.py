@@ -1,4 +1,5 @@
 import re
+from  math import ceil
 def validate(name, data, **kwargs):
 
     if data in kwargs['require']:
@@ -7,4 +8,3 @@ def validate(name, data, **kwargs):
         return 'not exist'
     if len(data) > kwargs['length']:
         return 'Khong duoc vuot qua' + str(kwargs['length'])
-    

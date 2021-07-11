@@ -11,7 +11,7 @@
 					<tr>
 						<td><span style="color:red">*</span> アカウント名:</td>
 						{% if page_id == 0 %}
-							<td> <input type="text" name="email" value=""> </td>
+							<td> <input type="email" name="email" maxlength='15' required> </td>
 						{% else %}
 							<td>{{user.email}}</td>
 						{% endif %}
@@ -19,8 +19,8 @@
 					<tr>
 						<td><span style="color:red">*</span> グループ:</td>
 						<td>
-							<select id="sel1" name="group" value='BAP Đà Nẵng'>
-				        <option>選択してください</option>
+							<select id="sel1" name="group" required>
+				        <option value=''>選択してください</option>
 								{% for group in groups %}
 									{% if group == user.group_name %}
 										<option selected>{{group}}</option>
@@ -34,8 +34,8 @@
 					<tr>
 						<td><span style="color:red">*</span>ロール:</td>
 						<td>
-							<select id="sel1" name="role">
-				        <option>選択してください</option>
+							<select id="sel1" name="role" checked required>
+				        <option value=''>選択してください</option>
 								{% for role in roles %}
 									{% if role == user.role_name %}
 										<option selected>{{role}}</option>
@@ -48,29 +48,29 @@
 					</tr>
 					<tr>
 						<td><span style="color:red">*</span> 氏名:</td>
-						<td> <input type="text" name="full_name" value="{{user.full_name}}"></td>
+						<td> <input type="text" name="full_name" maxlength='255' value="{{user.full_name}}" required></td>
 					</tr>
 					<tr>
 						<td>カタカナ氏名:</td>
-						<td> <input type="text" name="fullname_kana" value="{{user.fullname_kana}}"></td>
+						<td> <input type="text" name="fullname_kana" maxlength='255' value="{{user.fullname_kana}}"></td>
 					</tr>
 					<tr>
 						<td><span style="color:red">*</span> 生年月日:</td>
 						<td>
-							<input type="date" name="birthday" value="{{user.birthday}}">
+							<input type="date" name="birthday" value="{{user.birthday}}" required>
 						</td>
 					</tr>
 					<tr>
-						<td>メールアドレス:</td>
-						<td> <input type="text" name="persional_email" value="{{user.persional_email}}"></td>
+						<td><span style="color:red">*</span>メールアドレス:</td>
+						<td> <input type="email" maxlength="100" name="persional_email" value="{{user.persional_email}}" required></td>
 					</tr>
 					<tr>
 						<td><span style="color:red">*</span> 電話番号:</td>
-						<td> <input type="text" name="tel" value="{{user.tel}}"></td>
+						<td> <input type="tel" name="tel" pattern="[0-9]+-[0-9]+-[0-9]+" maxlength='14' value="{{user.tel}}" required></td>
 					</tr>
 					<tr>
 						<td><span style="color:red">*</span> パスワード:</td>
-						<td> <input type="text" name="password" value=""> </td>
+						<td> <input type="text" name="password" pattern="[&#32;-&#255;]+" minlength="5" maxlength="15" value="" required> </td>
 					</tr>
 					<tr>
 						<td>パスワード（確認）:</td>
