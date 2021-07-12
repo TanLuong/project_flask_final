@@ -20,56 +20,42 @@ bp = Blueprint('views', __name__)
 
 
 
-@bp.route("/", methods=["GET", "POST"])
+@bp.route("/", methods=["GET"])
 # @login_required
 def employee():
     page = request.args.get('page', 1, type=int)
-    pagination = 5
+    pagination = 10
     group_list = ['BAP Đà Nẵng', 'BAP Huế', 'BAP Tp HCM',
         'BAP TOKYO', 'BAP OSAKA']
     list_columns = ['id','full_name', 'birthday', 'group_name', 'email',
         'onboard_date', 'role_name']
-    if request.method == "POST":
-        name = request.form['search']
-        group = request.form['group']
-        g.name = request.form['ordername']
-        g.role = request.form['orderrole']
-        g.date = request.form['orderdate']
-        x = User.full_name
-        y = Role.role_name
-        z = User.onboard_date
-        if g.name == '⌃':
-            x = User.full_name.desc()
-        if g.role == '⌃':
-            y = Role.role_name.desc()
-        if g.date == '⌃':
-            z = User.onboard_date.desc()
-        if group == '全て':
-            group = ''
-        query = db.session.query(User.id,
-            User.email, User.full_name, User.tel, User.birthday,
-            User.onboard_date, Mst_group.group_name,
-            Role.role_name
-            ).join(Role).join(Mst_group
-            ).filter(User.full_name.like(f'%{name}%')
-            ).filter(Mst_group.group_name.like(f'%{group}%')
-            ).order_by(x, y, z).paginate(page, pagination, False)
-        return render_template('views/list_employees.html',
-            users=list_columns, rows=query, group=(ceil(page/3)-1),
-            name=name, se_group=group, group_list=group_list)
-    g.name = "⌄"
-    g.role = "⌄"
-    g.date = "⌃"
+    name = request.args.get('search','')
+    if '%' in name:
+        name = name.replace('%', r'%')
+    group = request.args.get('group','')
+    g.name = request.args.get('ordername', '⌄')
+    g.role = request.args.get('orderrole', '⌄')
+    g.date = request.args.get('orderdate', '⌃')
+    x = User.full_name
+    y = Role.role_name
+    z = User.onboard_date
+    if g.name == '⌃':
+        x = User.full_name.desc()
+    if g.role == '⌃':
+        y = Role.role_name.desc()
+    if g.date == '⌃':
+        z = User.onboard_date.desc()
     query = db.session.query(User.id,
-        User.email, User.full_name, User.gender, User.birthday,
-        User.onboard_date, Mst_group.group_name, User.tel,
+        User.email, User.full_name, User.tel, User.birthday,
+        User.onboard_date, Mst_group.group_name,
         Role.role_name
         ).join(Role).join(Mst_group
-        ).order_by(User.full_name, Role.role_name,
-        User.onboard_date.desc()).paginate(page, pagination, False)
+        ).filter(User.full_name.contains(name)
+        ).filter(Mst_group.group_name.like(f'%{group}%')
+        ).order_by(x, y, z).paginate(page, pagination, False)
 
     return render_template('views/list_employees.html', users=list_columns,
-        rows=query, group=(ceil(page/3)-1),
+        rows=query, group=(ceil(page/3)-1), name=name, se_group=group,
         group_list=group_list)
 
 

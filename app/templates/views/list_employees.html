@@ -5,7 +5,7 @@
       <p class="col-md-12 text-center">会員名称で会員を検索します。検索条件無しの場合は全て表示されます。</p>
     </div>
 <br>
-<form id='submit' action="{{url_for('views.employee')}}" method="post">
+<form id='submit' action="{{url_for('views.employee')}}" method="get">
   <div class="row mb-3">
     <div class="col-sm-2 text-left"></div>
     <div class="col-sm-1 ml-5 text-left">氏名:</div>
@@ -16,12 +16,12 @@
     <div class="col-sm-1 ml-5 text-left">グループ:</div>
     <div class="col-md-8">
       <select id="sel1" name="group">
-        <option>全て</option>
+        <option value=''>全て</option>
         {% for group_role in group_list %}
           {% if group_role == se_group %}
-            <option selected>{{group_role}}</option>
+            <option value='{{group_role}}' selected>{{group_role}}</option>
           {% else %}
-            <option>{{group_role}}</option>
+            <option value='{{group_role}}'>{{group_role}}</option>
           {% endif %}
         {% endfor %}
       </select>
