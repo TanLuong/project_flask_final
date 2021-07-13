@@ -8,11 +8,13 @@ from flask import (
     send_from_directory
 )
 from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.datastructures import TypeConversionDict
 
 from .models import (db, User, Mst_devices, Mst_group, Role,
                      User_device_history, UserScure
 )
 from .auth import login_required
+from .function import check
 
 
 bp = Blueprint('views', __name__)
@@ -24,18 +26,18 @@ bp = Blueprint('views', __name__)
 # @login_required
 def employee():
     page = request.args.get('page', 1, type=int)
-    pagination = 10
+    name = request.args.get('search','', type=str)
+    group = request.args.get('group','', type=str)
+    g.name = request.args.get('ordername', '⌄', type=str)
+    g.role = request.args.get('orderrole', '⌄', type=str)
+    g.date = request.args.get('orderdate', '⌃', type=str)
+    pagination = 1
     group_list = ['BAP Đà Nẵng', 'BAP Huế', 'BAP Tp HCM',
         'BAP TOKYO', 'BAP OSAKA']
     list_columns = ['id','full_name', 'birthday', 'group_name', 'email',
         'onboard_date', 'role_name']
-    name = request.args.get('search','')
     if '%' in name:
-        name = name.replace('%', r'%')
-    group = request.args.get('group','')
-    g.name = request.args.get('ordername', '⌄')
-    g.role = request.args.get('orderrole', '⌄')
-    g.date = request.args.get('orderdate', '⌃')
+        name = name.replace('%','/%')
     x = User.full_name
     y = Role.role_name
     z = User.onboard_date
@@ -45,69 +47,65 @@ def employee():
         y = Role.role_name.desc()
     if g.date == '⌃':
         z = User.onboard_date.desc()
+
     query = db.session.query(User.id,
         User.email, User.full_name, User.tel, User.birthday,
         User.onboard_date, Mst_group.group_name,
         Role.role_name
         ).join(Role).join(Mst_group
-        ).filter(User.full_name.contains(name)
+        ).filter(User.full_name.ilike(f'%{name}%', escape='/')
         ).filter(Mst_group.group_name.like(f'%{group}%')
         ).order_by(x, y, z).paginate(page, pagination, False)
 
-    return render_template('views/list_employees.html', users=list_columns,
-        rows=query, group=(ceil(page/3)-1), name=name, se_group=group,
-        group_list=group_list)
-
+    return render_template('views/list_employees.html',
+        users=list_columns, rows=query, Group=(ceil(page/3)-1),
+        group_list=group_list, maxgroup=(ceil(query.pages/3)>(ceil(page/3))),
+        name=name, group=group
+        )
 
 @bp.route('/update/<int:id>', methods = ['GET', 'POST'])
 # @login_required
 def update(id):
-    group = ['BAP Đà Nẵng', 'BAP Huế', 'BAP Tp HCM', 'BAP TOKYO', 'BAP OSAKA']
-    role = ['Super User', 'Admin', 'PMO', 'BMO', 'PM',
-        'Leader', 'Developer', 'QC', 'QA', 'BrSE', 'Fresher', 'Intern'
-    ]
-    if request.method == "POST":
-        if id == 0:
-            email = request.form['email']
-            role_name = request.form['role']
-            group_name = request.form['group']
-            full_name = request.form['full_name']
-            fullname_kana = request.form['fullname_kana']
-            birthday = request.form['birthday']
-            persional_email = request.form['persional_email']
-            tel = request.form['tel']
-            pwd = request.form['password']
-            pwd = generate_password_hash(pwd)
-            pwd_confirm = request.form['pass_confirm']
-            query_group = Mst_group.query.filter(
-                Mst_group.group_name==group_name).first()
-            query_role = Role.query.filter(
-                Role.role_name==role_name).first()
-            group_id = query_group.group_id
-            role_id = query_role.role_id
-            x = {'user_name':email,
-                          'password':pwd}
-            y = {'group_id':group_id,
-                'email':email, 'persional_email':persional_email,
-                'full_name':full_name, 'fullname_kana':fullname_kana,
-                'tel':tel, 'birthday':birthday,
-                'role_id':role_id
-            }
-
-            session['user_new'] = json.dumps(y)
-            session['scure_new'] = json.dumps(x)
-
-            return render_template('views/confirm.html', group=group_name,
-                role=role_name, email=email, full_name=full_name,
-                fullname_kana=fullname_kana, birthday=birthday,
-                persional_email=persional_email, tel=tel)
+    group = Mst_group.query.all()
+    role = Role.query.all()
+    email = request.form.get('email', '')
+    role_id = request.form.get('role', '')
+    group_id = request.form.get('group', '')
+    full_name = request.form.get('full_name', '')
+    fullname_kana = request.form.get('fullname_kana', '')
+    birthday = request.form.get('birthday', '')
+    persional_email = request.form.get('persional_email', '')
+    tel = request.form.get('tel', '')
+    pwd = request.form.get('password', '')
+    pwd = generate_password_hash(pwd)
+    pwd_confirm = request.form.get('pass_confirm', '')
+    if request.method == 'POST':
+        x = {'user_name':email,
+                      'password':pwd}
+        y = {'group_id':group_id,
+            'email':email, 'persional_email':persional_email,
+            'full_name':full_name, 'fullname_kana':fullname_kana,
+            'tel':tel, 'birthday':birthday,
+            'role_id':role_id
+        }
+        session['update'] = 0
+        if id !=0:
+            y.pop('email')
+            session['update'] = id
+        session['user_new'] = json.dumps(y)
+        session['scure_new'] = json.dumps(x)
+        return render_template('views/confirm.html',
+            group=Mst_group.query.get(group_id).group_name,
+            role=Role.query.get(role_id).role_name,
+            email=User.query.get(id)
+            )
 
     query = db.session.query(User.id,
         User.email, User.full_name, User.gender, User.birthday,
         User.fullname_kana, User.persional_email,
         User.onboard_date, Mst_group.group_name, User.tel,
-        Role.role_name
-        ).join(Role).join(Mst_group).filter(User.user_id == id).first()
+        Role.role_name, UserScure.password, Role.role_id
+        ).join(Role).join(Mst_group).filter(User.id == id).first()
     return render_template('views/edit.html', page_id=id, user=query,
         groups=group, roles=role)
 
@@ -122,6 +120,12 @@ def view_detail(id):
         User_device_history.start_date,
         User_device_history.end_date,
     ).join(Mst_devices).filter(User_device_history.id == id).all()
+    if request.method == 'POST':
+        user = User.query.filter(User.id==id).first()
+        db.session.delete(user)
+        db.session.commit()
+        return render_template('views/announce',
+        annnounce='ユーザの削除が完了しました。')
     return render_template('views/view_employee.html', user=query_user,
         devices=query_devices, page_id = id)
 
@@ -133,10 +137,17 @@ def confirm():
     x_load = json.loads(x)
     y_load = json.loads(y)
     y_load['onboard_date'] = db.func.now()
+    if session['update']:
+        user = db.session.query(User).filter(
+            User.id==session['update']).update(y_load)
+        db.session.commit()
+        return render_template('views/announce.html',
+            annnounce='ユーザの更新が完了しました。')
     userscure = UserScure(**x_load)
     user = User(**y_load)
     userscure.child.append(user)
     db.session.add(userscure)
     db.session.add(user)
     db.session.commit()
-    return redirect(url_for('views.employee'))
+    return render_template('views/announce.html',
+        announce='ユーザの登録が完了しました。')

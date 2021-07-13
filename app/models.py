@@ -38,7 +38,7 @@ class User(db.Model, BaseData):
     id = db.Column('id', db.Integer, primary_key=True)
     user_id = db.Column('user_id', db.Integer, db.ForeignKey('user_scure.user_id'), nullable=False, unique=True)
     group_id = db.Column('group_id', db.Integer, db.ForeignKey('mst_group.group_id'), nullable=False)
-    email = db.Column('email', db.String(255), nullable=False)
+    email = db.Column('email', db.String(255), nullable=False, unique=True)
     persional_email = db.Column('persional_email', db.String(255), nullable=False)
     full_name = db.Column('full_name', db.String(255), nullable=False)
     fullname_kana = db.Column('fullname_kana', db.String(255))

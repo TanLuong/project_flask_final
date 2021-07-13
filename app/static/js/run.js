@@ -1,9 +1,3 @@
-// $(document).ready(function(){
-//   $("#btn").click(function(){
-//     $("#collapseExample").append(" <b>Appended text</b>.");
-//   });
-// });
-
 counter = 1;
 $(document).ready(function(){
   $("#btn").click(function(){
@@ -25,3 +19,34 @@ $(document).ready(function(){
     counter ++;
   })
 });
+
+function goBack() {
+  window.history.back();
+}
+
+function change(a) {
+  if (document.getElementById(a).value == '⌄'){
+    document.getElementById(a).value = '⌃';
+    document.getElementById("submit").submit();
+
+  } else {
+    document.getElementById(a).value = '⌄';
+    document.getElementById("submit").submit();
+  }
+}
+
+function action(a){
+  var x = document.getElementById("submit");
+  var y = document.createElement("input");
+  y.name = 'page';
+  y.value = a;
+  y.hidden = true;
+  x.appendChild(y);
+  x.submit();
+}
+
+function deldb(){
+  if (confirm("削除しますが、よろしいでしょうか。")){
+      document.getElementById("submit").submit();
+    }
+}

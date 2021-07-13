@@ -62,12 +62,11 @@
 <br>
  <div class="row">
 	 <span class="col-sm-6"></span>
-	 <a class='btn-primary btn-sm mr-4' href="{{url_for('views.update', id=page_id)}}">編集</a>
-	 <form class="" action="index.html" method="post">
-	 	<input class='col-sm-1 btn-primary btn-sm mr-4'  type="submit" value="削除">
+	 <a class='btn btn-primary  mr-4' href="{{url_for('views.update', id=page_id)}}">編集</a>
+	 <form class="" id="submit" action="" method="post">
+	 	<button class='btn btn-danger bg-danger mr-4'  onclick="deldb()" value="削除">削除</button>
 	 </form>
 
-	 <a class='btn-secondary btn-sm' href="{{url_for('views.employee')}}">戻る</a>
+	 <a class='btn btn-secondary ' href="#" onclick="goBack()">戻る</a>
  </div>
-
 {% endblock %}
