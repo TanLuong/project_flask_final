@@ -51,7 +51,7 @@ class User(db.Model, BaseData):
     role_id = db.Column('role_id', db.Integer, db.ForeignKey('role.role_id'))
     children = db.relationship('User_device_history',
         backref=db.backref()
-    )
+    )dfdf
 
 class User_device_history(db.Model, BaseData):
     __tablename__ = 'user_device_history'
