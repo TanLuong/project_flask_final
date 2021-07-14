@@ -14,7 +14,7 @@ from .models import (db, User, Mst_devices, Mst_group, Role,
                      User_device_history, UserScure
 )
 from .auth import login_required
-from .function import check
+from .function import vali_dict, validate
 
 
 bp = Blueprint('views', __name__)
@@ -31,7 +31,7 @@ def employee():
     g.name = request.args.get('ordername', '⌄', type=str)
     g.role = request.args.get('orderrole', '⌄', type=str)
     g.date = request.args.get('orderdate', '⌃', type=str)
-    pagination = 1
+    pagination = 5
     group_list = ['BAP Đà Nẵng', 'BAP Huế', 'BAP Tp HCM',
         'BAP TOKYO', 'BAP OSAKA']
     list_columns = ['id','full_name', 'birthday', 'group_name', 'email',
@@ -77,21 +77,45 @@ def update(id):
     persional_email = request.form.get('persional_email', '')
     tel = request.form.get('tel', '')
     pwd = request.form.get('password', '')
-    pwd = generate_password_hash(pwd)
+    pwd_encode = generate_password_hash(pwd)
     pwd_confirm = request.form.get('pass_confirm', '')
+    query = db.session.query(User.id,
+        User.email, User.full_name, User.gender, User.birthday,
+        User.fullname_kana, User.persional_email,
+        User.onboard_date, Mst_group.group_name, User.tel,
+        Role.role_name, UserScure.password, Role.role_id
+        ).join(Role).join(Mst_group).filter(User.id == id).first()
+    error = dict()
     if request.method == 'POST':
         x = {'user_name':email,
-                      'password':pwd}
+                      'password':pwd_encode}
         y = {'group_id':group_id,
             'email':email, 'persional_email':persional_email,
             'full_name':full_name, 'fullname_kana':fullname_kana,
             'tel':tel, 'birthday':birthday,
             'role_id':role_id
         }
+        vali = {'email':email, 'persional_email':persional_email,
+            'full_name':full_name, 'fullname_kana':fullname_kana,
+            'tel':tel, 'password':pwd
+            }
+        vali_dict['email']['query'] = db.session.query(User.email).all()
         session['update'] = 0
+        for i in vali:
+            if validate(vali[i], **vali_dict[i]):
+                error[i] = validate(vali[i], **vali_dict[i])
+                return render_template('views/edit.html', page_id=id,
+                    user=query, groups=group, roles=role, error=error)
+
         if id !=0:
             y.pop('email')
             session['update'] = id
+        else:
+            if validate(pwd, compare=pwd_confirm ):
+                error['pass_confirm'] = validate(pwd, compare=pwd_confirm)
+                return render_template('views/edit.html',
+                    page_id=id, user=query,
+                    groups=group, roles=role, error=error)
         session['user_new'] = json.dumps(y)
         session['scure_new'] = json.dumps(x)
         return render_template('views/confirm.html',
@@ -99,15 +123,8 @@ def update(id):
             role=Role.query.get(role_id).role_name,
             email=User.query.get(id)
             )
-
-    query = db.session.query(User.id,
-        User.email, User.full_name, User.gender, User.birthday,
-        User.fullname_kana, User.persional_email,
-        User.onboard_date, Mst_group.group_name, User.tel,
-        Role.role_name, UserScure.password, Role.role_id
-        ).join(Role).join(Mst_group).filter(User.id == id).first()
     return render_template('views/edit.html', page_id=id, user=query,
-        groups=group, roles=role)
+        groups=group, roles=role, error=error)
 
 @bp.route('/view/<int:id>', methods = ['GET', 'POST'])
 def view_detail(id):
@@ -124,8 +141,8 @@ def view_detail(id):
         user = User.query.filter(User.id==id).first()
         db.session.delete(user)
         db.session.commit()
-        return render_template('views/announce',
-        annnounce='ユーザの削除が完了しました。')
+        return render_template('views/announce.html',
+        announce='ユーザの削除が完了しました。')
     return render_template('views/view_employee.html', user=query_user,
         devices=query_devices, page_id = id)
 
@@ -142,7 +159,7 @@ def confirm():
             User.id==session['update']).update(y_load)
         db.session.commit()
         return render_template('views/announce.html',
-            annnounce='ユーザの更新が完了しました。')
+            announce='ユーザの更新が完了しました。')
     userscure = UserScure(**x_load)
     user = User(**y_load)
     userscure.child.append(user)

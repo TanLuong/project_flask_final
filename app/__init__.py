@@ -7,8 +7,8 @@ from .models import db
 
 db_manage = 'mysql'
 acc = 'nhattan'
-pw = 'Khongbiet2807'
-host = 'localhost'
+pw = 'baptan0302'
+host = '127.0.0.1'
 db_name = 'test'
 encoding = 'charset=utf8mb4'
 

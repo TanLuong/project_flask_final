@@ -1,7 +1,5 @@
 import re
-from  math import ceil
 
-from werkzeug.datastructures import TypeConversionDict
 
 def validate(data, **kwargs):
     validator = list()
@@ -9,8 +7,10 @@ def validate(data, **kwargs):
         validator.append("「画面項目名」を入力してください")  # Hay chon
     for i in kwargs:
         if i == 'query':
-            if data in kwargs['query']:
-                validator.append("「画面項目名」は既に存在しています。") # da ton tai
+            for j in kwargs[i]:
+                if data in j:
+                    validator.append("「画面項目名」は既に存在しています。") # da ton tai
+                    break
         if i == 'format':
             if not re.findall(kwargs['format'], data):
                 validator.append(f"「画面項目名」を{kwargs['format']}形式で入力してください") # sai format
@@ -25,14 +25,42 @@ def validate(data, **kwargs):
                 for j in data:
                     if ord(j) > 255:
                         validator.append('「画面項目名」に半角英数を入力してください')
-        # if i == 'compare':
+                        break
+        if i == 'compare':
+            if data != kwargs['compare']:
+                validator.append('「パスワード（確認」が不正です。')
 
     return validator
 
+vali_dict = {
+    'email' : {
+        'format' : '.+@.+(\.).+',
+        'max_length' : 15,
+        'query' : ''
+    },
+    'full_name' : {
+        'max_length' : 255
+    },
+    'fullname_kana' : {
+        'max_length' : 255,
+    },
+    'tel' : {
+        'max_length' : 14,
+        'format' : '[0-9]+-[0-9]+-[0-9]+$'
+    },
+    'password' : {
+        'onebyte' : True,
+        'range' : (5,15),
+    },
+    'persional_email' : {
+        'format' : '.+@.+(\.).+',
+        'max_length' : 15,
+        'query' : ''
+    }
+}
 def check(a,b):
     if a == b:
         return True
     return False
-
-a = validate('0386-556-225', format='[0-9]{4}-[0-9]{3}-[0-9]{3}$' )
-print(a)
+a = validate('sfs@sdf.com', **vali_dict['email'])
+print(vali_dict['email']['query'])
