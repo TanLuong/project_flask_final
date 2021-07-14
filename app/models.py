@@ -49,7 +49,9 @@ class User(db.Model, BaseData):
     onboard_date = db.Column('onboard_date', db.Date(), nullable=False)
     avatar_url = db.Column('avatar', db.String(15))
     role_id = db.Column('role_id', db.Integer, db.ForeignKey('role.role_id'))
-    children = db.relationship('User_device_history')
+    children = db.relationship('User_device_history',
+        backref=db.backref()
+    )
 
 class User_device_history(db.Model, BaseData):
     __tablename__ = 'user_device_history'
