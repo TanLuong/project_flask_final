@@ -138,7 +138,7 @@ def view_detail(id):
         User_device_history.end_date,
     ).join(Mst_devices).filter(User_device_history.id == id).all()
     if request.method == 'POST':
-        user = User.query.filter(User.id==id).first()
+        userscure = UserScure.query.filter(User.id==id).first()
         db.session.delete(user)
         db.session.commit()
         return render_template('views/announce.html',

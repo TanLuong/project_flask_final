@@ -49,9 +49,10 @@ class User(db.Model, BaseData):
     onboard_date = db.Column('onboard_date', db.Date(), nullable=False)
     avatar_url = db.Column('avatar', db.String(15))
     role_id = db.Column('role_id', db.Integer, db.ForeignKey('role.role_id'))
-    children = db.relationship('User_device_history',
-        backref=db.backref()
-    )dfdfdfd
+    children = db.relationship('User_device_history')
+    user_scure = db.relationship('UserScure',
+        backref=db.backref('user', cascade='all, delete-orphan', lazy='joined')
+    )
 
 class User_device_history(db.Model, BaseData):
     __tablename__ = 'user_device_history'
@@ -61,12 +62,14 @@ class User_device_history(db.Model, BaseData):
     end_date = db.Column('end_date', db.DateTime)
     is_deleted = db.Column('is_deleted',db.Boolean(), nullable=False)
     device_id = db.Column('device_id', db.Integer, db.ForeignKey('mst_devices.device_id'), nullable=False)
-
+    user = db.relationship('User',
+        backref=db.backref('user_device_history', cascade='all, delete-orphan', lazy='joined')
+    )
 
 class UserScure(db.Model, BaseData):
     __tablename__ = 'user_scure'
     user_id = db.Column('user_id', db.Integer, primary_key=True)
     user_name = db.Column('user_name', db.String(20), unique=True, nullable=False)
     password = db.Column('password', db.String(255), nullable=False)
-    child = db.relationship('User', backref=db.backref('user_scure'),
-                             lazy='joined')
+    # child = db.relationship('User', backref=db.backref('user_scure'),
+    #                          lazy='joined')
